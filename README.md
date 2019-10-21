@@ -10,3 +10,4 @@ Example: x, var, my_variable
 
 Function name: Same as variable name
 Example: function, my_function
+Wrong example: myFunction, MyFunction
