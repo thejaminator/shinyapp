@@ -15,3 +15,5 @@ Wrong example: myFunction, MyFunction
 # Resources
 Leaflet
 https://rstudio.github.io/leaflet/popups.html
+Plotly
+https://plotly-r.com/linking-views-with-shiny
