@@ -16,7 +16,7 @@ source("modules/mongo.R")
 
 
 ### load carpark dataset from mongo only when initialized
-carparkAvail<-getAllCarparks(limit=500, fake=TRUE) #use fake=TRUE to avoid calling mongodb and use bakcup
+carparkAvail<-getAllCarparks(limit=500, fake=FALSE) #use fake=TRUE to avoid calling mongodb and use bakcup
 uniqueCarparks <- unique(carparkAvail$carpark_name)
 ### load latest time from mongo
 latestTime<-carparkAvail$time[[1]]
@@ -54,6 +54,7 @@ server <- function(input, output, session, ...) {
     
     # Show the number of availability and maximum number of lots##
     output$avail_table<- renderTable({
+        req(input$chosenCarparks)
         df<-datasetInput() %>% filter(time == latestTime) %>% select(carpark_name, avail_lots)
         head(df)
     })
