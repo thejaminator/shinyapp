@@ -1,0 +1,5 @@
+library(mongolite)
+
+###THIS FILE SHOULD NOT BE UPLAODED TO GITHUB!!!
+user<-"jacknme"
+pass<-"mongoMONGO135"

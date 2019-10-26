@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1572100680114.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1782677865",
+    "id" : "D85B2BC0",
+    "lastKnownWriteTime" : 1572099603,
+    "last_content_update" : 1572099603,
+    "path" : "~/Google_Drive/unilaptop/dba_des/shinyapp/app.R",
+    "project_path" : "app.R",
+    "properties" : {
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
