@@ -6,7 +6,7 @@ library(shiny)
 
 range_lat <- c(1.28967-1,1.28967+1)
 range_lng <- c(103.85007-1, 103.85007+1)
-data <- read.csv('hdb_carpark_intersection.csv')
+data <- read.csv('hdb_available_query.csv')
 
 get_zoom_level <- function(postal_code) {
   url <- 'https://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyAjKAKegmEpoOwDPBTq5D7PYlbsWXIYF_g&components=postal_code:'

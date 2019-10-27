@@ -1,6 +1,12 @@
 # shinyapp
 This repo serves to coordinate our shinyapp
 
+# How to pull?
+This will update your local git repo with github master
+```
+git pull origin master
+```
+
 
 # Best practices
 We follow PEP8 styling.
@@ -11,6 +17,7 @@ Example: x, var, my_variable
 Function name: Same as variable name
 Example: function, my_function
 Wrong example: myFunction, MyFunction
+
 
 # Resources
 Leaflet

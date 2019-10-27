@@ -1,5 +1,5 @@
 library(tidyr)
-
+library(mongolite)
 # load login variables
 source("modules/login.R")
 #login.R should have two variables
@@ -18,11 +18,11 @@ getCarpark<-function(mongo_collection=availabilityCollection, carpark_id, limit=
 
 getAllCarparks<-function(mongo_collection=availabilityCollection, limit=100, fake = FALSE){
   if (fake == TRUE){
-    return(readRDS("backup"))
+    return(readRDS("./data/backup"))
   }
   else {
     #get latest carpark from mongo
-    df<-carpark$find('{}' , limit = limit, sort='{"time":-1}')
+    df<-availabilityCollection$find('{}' , limit = limit, sort='{"time":-1}')
     #reshape into tidy
     df %>% gather(key=carpark_name,value = avail_lots, -time)
   }
@@ -30,5 +30,6 @@ getAllCarparks<-function(mongo_collection=availabilityCollection, limit=100, fak
 }
 
 #in case mongo does not work
-# backup<-getAllCarparks(limit=100)
-# backup %>% saveRDS("backup")
+# backup<-getAllCarparks(limit=1000)
+# backup %>% saveRDS("./data/backup")
+
