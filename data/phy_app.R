@@ -6,7 +6,7 @@ library(shiny)
 
 range_lat <- c(1.28967-1,1.28967+1)
 range_lng <- c(103.85007-1, 103.85007+1)
-data <- read.csv('hdb_available_query.csv')
+hdb_geo_info <- read.csv('hdb_available_query.csv')
 
 get_zoom_level <- function(address) {
   url <- "https://maps.googleapis.com/maps/api/geocode/json?address="
@@ -36,7 +36,7 @@ ui <- fluidPage(
 
 server <- function(input, output){
   output$map <- renderLeaflet({
-    leaflet() %>% addTiles() %>% addMarkers(data = data, lng = ~lon, lat = ~lat)
+    leaflet() %>% addTiles() %>% addMarkers(data = hdb_geo_info, lng = ~lon, lat = ~lat)
   })
   
   observeEvent(input$button, {
