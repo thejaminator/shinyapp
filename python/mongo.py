@@ -4,8 +4,24 @@ import datetime
 import math
 import time
 import gov_api
+
+# class IntervalTimer:
+#     def __init__(self,unit_interval = {"second":1}, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.unit = unit
+#         self.interval_unit = interval_unit
+#     def get_time(self):
+#         time_now=datetime.datetime.now().replace(microsecond=0)
+#         time_now = time_now.replace(second = math.floor(time_now.second/interval)*interval)
+
+
+#     def 
+
+
+
 def get_time(interval=1):
     """
+    MAYBEDEPRECATED IN PLACE OF TIMER
     Gets current time with seconds floored to specified interval
     
     Parameters
@@ -108,7 +124,7 @@ class TimedExecutor:
                 print(f"Start time {start_time}")
                 #sleep for time_difference
                 time_difference = (query_time - start_time).total_seconds()
-                print(f"Faster than current time, sleeping for {time_difference}")
+                print(f"Faster than current time, sleeping for {time_difference} seconds")
                 time.sleep(time_difference)
                 #Update the current time
                 now_time = get_time(interval= self.interval)
