@@ -21,22 +21,28 @@ library(shiny)
 ui <- fluidPage(
   useShinyFeedback(),
   
-  headerPanel("Car Parks in Singapore"),
+  headerPanel("Car Park Availability"),
   sidebarPanel(
-    textInput(inputId = 'address', 
-              label= "Address/Postal Code:",
-              value = "-"),
-    actionButton('button', 'Zoom')
+    conditionalPanel("input.tabselected == 1",
+                     textInput(inputId = 'address', 
+                               label= "Address/Postal Code:",
+                               value = "-"),
+                     actionButton('button', 'Zoom'))
   ),
-  
-  mainPanel(
-    leafletOutput('map')
+  mainPanel( 
+    tabsetPanel(
+      tabPanel("Current", value = 1, leafletOutput("map")),
+      tabPanel("Predicted Availability", value = 2, verbatimTextOutput("summary")),
+      id = 'tabselected'
+    )
   )
 )
 
+
+
 server <- function(input, output){
   output$map <- renderLeaflet({
-    leaflet() %>% addTiles() %>% addMarkers(data = data, lng = ~lon, lat = ~lat)
+    leaflet() %>% addTiles() %>% addMarkers(data = data, lng = ~lon, lat = ~lat, popup = paste0("<a href = https://www.google.com/maps?saddr=My+Location&daddr=", data$lat,",", data$lon,"> Go there now </a>"))
   })
   
   observeEvent(input$button, {
