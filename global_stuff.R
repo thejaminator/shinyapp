@@ -7,6 +7,10 @@ library(dplyr)
 library(data.table)
 library(shinydashboardPlus)
 library(shinydashboard)
+library(data.table)
+library(htmltools)
+
+
 
 
 
@@ -30,7 +34,17 @@ latestTime<-carparkAvail$time[[1]]
 #Phyllis stuff
 range_lat <- c(1.28967-1,1.28967+1)
 range_lng <- c(103.85007-1, 103.85007+1)
-hdb_geo_info <- read.csv('data/hdb_available_query.csv')
+hdb_geo_info <- read.csv('data/hdb_available_query.csv') %>% arrange(car_park_no) 
+#add lot availability for current time
+hdb_geo_info$avail_lots <- get_avail_lots(index_df=hdb_geo_info,avail_df=carparkAvail,latest_time=latestTime)$avail_lots
+#somehow there is n.a in the dataframe availability
+hdb_geo_info <- hdb_geo_info %>% filter(!is.na(avail_lots))
+#add icons
+icons <- get_icons(hdb_geo_info, avail_lots=avail_lots)
+#add map overlay
+carpark_types = c('BASEMENT CAR PARK', 'MULTI-STOREY CAR PARK','SURFACE CAR PARK')
+
+
 #End phyllis stuff
 
 
