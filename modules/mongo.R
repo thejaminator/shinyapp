@@ -1,7 +1,7 @@
 library(tidyr)
 library(mongolite)
 # load login variables
-source("modules/login.R", local= TRUE)
+
 #login.R should have two variables
 # user<-"username"
 # pass<-"password"
@@ -9,6 +9,7 @@ source("modules/login.R", local= TRUE)
 
 #set up collection to query
 get_collection <- function(collection="carpark",db = "test_db"){
+  source("modules/login.R", local= TRUE)
   mongo(collection=collection,db = db,
         url=sprintf('mongodb+srv://%s:%s@james-cluster-bfs0h.gcp.mongodb.net',user,pass))
 }
