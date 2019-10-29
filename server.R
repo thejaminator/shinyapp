@@ -1,30 +1,40 @@
 
 source("global_stuff.R", local=FALSE)
 server <- function(input, output, session, ...) {
-  #Make reactive input
-  # carpark_info_selected <- reactive({
-  #   hdb_geo_info %>%
-  #     filter(car_park_type %in% input$chosen_carparks)
-  # })
-  
-  output$map <- renderLeaflet({
-      map <- leaflet() %>% addTiles()
-      # %>% addAwesomeMarkers(data = hdb_geo_info, icon = icons,
-      #                             lng = ~lon, lat = ~lat, label = ~htmlEscape(paste(avail_lots)),
-      #                             labelOptions = labelOptions(noHide = T), clusterOptions = markerClusterOptions(disableClusteringAtZoom = 16))
-      map <- addAwesomeMarkers(map, data = hdb_geo_info, lng = ~lon, lat = ~lat, layerId =~car_park_no, label = ~htmlEscape(paste(avail_lots)), icon=icons,
-                                 labelOptions = labelOptions(noHide = T), clusterOptions = markerClusterOptions(disableClusteringAtZoom = 16))
-    }) #logic in map_functions
-
-  observeEvent(input$chosen_carparks,{
-    #THis doesbn't work LOL
-    # cat((hdb_geo_info[!hdb_geo_info$car_park_type %in% input$chosen_carparks,]$car_park_no) %>% as.character)
-    # leafletProxy('map') %>% removeMarker(hdb_geo_info$car_park_no %>% as.character)
-    leafletProxy('map') %>% removeMarker(layerId = (hdb_geo_info[!hdb_geo_info$car_park_type %in% c('BASEMENT CAR PARK'),])$car_park_no %>% as.character)
-    # leafletProxy('map') %>% removeMarker(layerId = hdb_geo_info[!hdb_geo_info$car_park_type %in% input$chosen_carparks, 'car_park_no'])
+  #Make reactive dataset based on inputs in sidebar
+  carpark_info_reactive <- reactive({
+    cat("Debug: updating carpark filter\n")
+    hdb_geo_info %>%
+      filter(car_park_type %in% input$chosen_carparks)
   })
   
-  # hdb_geo_info[hdb_geo_info$car_park_type %in% c('BASEMENT CAR PARK'), "car_park_no"]
+  icons_reactive <- reactive({
+    cat("Debug: getting icons\n")
+    get_icons(carpark_info_reactive(), avail_lots=avail_lots)
+  })
+  
+  output$map <- renderLeaflet({
+      map <- leaflet() %>% addTiles() %>% setView(lng = 103.7499, lat =1.350867, zoom  = 12)
+    }) 
+  
+  #James try to make markers work
+  observe({
+    data<-carpark_info_reactive()
+    leafletProxy('map', data = data) %>%
+      clearMarkers() %>%
+      clearMarkerClusters() %>%
+      {if (nrow(data) > 0)
+        addAwesomeMarkers(map =. ,lng = ~lon, lat = ~lat, clusterOptions = markerClusterOptions(disableClusteringAtZoom = 16), icon=icons_reactive(),
+                          layerId =~car_park_no,label = ~htmlEscape(paste(avail_lots)), labelOptions = labelOptions(noHide = T))
+        else cat("nothing to display. This if else statement exists to prevent crash\n")}
+  
+    
+    # leafletProxy("map") %>% clearMarkers()
+  })
+  
+
+  
+  #Handles search input and zooms to coords
   observeEvent(input$button, {
     lat_lon <- get_zoom_level(input$address)
     leafletProxy('map') %>% fitBounds(lng1 =lat_lon$lng+0.0025, lng2=lat_lon$lng-0.0025, lat1=lat_lon$lat+0.0025, lat2=lat_lon$lat-0.0025)
