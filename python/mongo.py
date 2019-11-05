@@ -32,7 +32,7 @@ def get_time(interval=1):
     Returns
     -----
     str
-        time floored to specified interval in iso format
+        time floored to specified interval in datetime
     
     >>>> time_interval(10)
     '2019-10-06T02:34:50'
@@ -83,8 +83,10 @@ def get_start_time(start_mode = "continue", mongo_collection=None):
         return get_latest_time(mongo_collection.collection)
     elif start_mode == "now":
         return get_time()
+    elif start_mode == "7daysago":
+        return get_time() - datetime.timedelta(days=7)
     else:
-        raise ValueError("start_mode params: continue, now")
+        raise ValueError("start_mode params: continue, now, 7daysago")
 
     
 

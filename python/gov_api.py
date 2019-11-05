@@ -40,6 +40,7 @@ def get_request(date_time):
     """
     #convert to iso for api
     date_time = date_time.isoformat()
+    # print("Querying...", date_time)
     url="https://api.data.gov.sg/v1/transport/carpark-availability"
     response = requests.get(url, {"date_time": date_time})
     return response

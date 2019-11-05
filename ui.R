@@ -32,9 +32,16 @@ ui <- dashboardPage(
   ),
   
   dashboardBody(
+    tags$head(tags$link(rel="stylesheet", type = "text/css", href = "custom.css")),
+    
     useShinyFeedback(),
     tabItems(
-      tabItem(tabName='current', leafletOutput('map'), plotlyOutput(outputId = "plot"), htmlOutput('link')),
+      tabItem(tabName='current', leafletOutput('map'), 
+              fluidRow(
+                column(5, plotlyOutput(outputId = "plot")), 
+                column (5, tableOutput('table'), htmlOutput('link')),
+                column(2, textOutput('weather'), textOutput('temp'))
+              )),
       tabItem(tabName='predict', h2('output another map'))
     )
   )

@@ -9,7 +9,8 @@ library(shinydashboardPlus)
 library(shinydashboard)
 library(data.table)
 library(htmltools)
-
+library(ggthemes)
+library(scales)
 
 
 

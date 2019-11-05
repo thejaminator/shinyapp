@@ -1,4 +1,3 @@
-
 source("global_stuff.R", local=FALSE)
 server <- function(input, output, session, ...) {
   #Make reactive dataset based on inputs in sidebar
@@ -55,19 +54,38 @@ server <- function(input, output, session, ...) {
   
   #for map filter
   observeEvent(input$map_marker_click, {
-    carpark_link <- hdb_geo_info[hdb_geo_info$car_park_no==input$map_marker_click$id,]
-    output$link <- renderText(paste0("<a href = https://www.google.com/maps?daddr=", carpark_link$lat,",", carpark_link$lon,"> Go there now </a>"))
+    specific_carpark_data <- hdb_geo_info[hdb_geo_info$car_park_no==input$map_marker_click$id,]
+    
+    
+    carpark_table <- specific_carpark_data[,c(1:7)]
+    colnames(carpark_table) <- c('Car Park No.', 'Address', 'Car Park Type', 'Type of Parking System','Short-Term Parking', 'Free Parking', 'Night Parking')
+    output$table <- renderTable(gather(carpark_table,'',''))
+    
+    
+    carpark_link <- specific_carpark_data[,c(11:12)]
+    output$link <-renderText(paste0("<a href = https://www.google.com/maps?daddr=", carpark_link$lat,",", carpark_link$lon,"> Go to Google Maps for Directions </a>"))
+    
+    url3 <- "https://api.openweathermap.org/data/2.5/weather?"
+    lat <- paste0("lat=", carpark_link$lat)
+    lon <- paste0("&lon=",carpark_link$lon)
+    appID<- "&APPID=a1e683f48fd044a44af31c3849470646"
+    units <- "&units=metric"
+    url_comp <-paste0(url3,lat,lon,appID,units)
+    weather_data <- fromJSON(url_comp)
+    output$temp <- renderText(paste0("Temperature: ",weather_data$main$temp," Degree Celcius"))
+    output$weather <- renderText(paste0("Weather: ", weather_data$weather$main))
+    
+    
     output$plot <- renderPlotly({
-      # req(input$map_marker_click$id)
-      # if (identical(input$chosenCarparks, "")) return(NULL)
-      #multiple plots
       plot_data <- carparkAvail %>% filter(carpark_name == paste0(input$map_marker_click$id,"_C"))
-      p <- ggplot(data = plot_data) + 
-        geom_line(aes(time, avail_lots))
+      p <- ggplot(data = plot_data) + geom_line(aes(time, avail_lots), size = 0.5) + xlab("Time") + 
+        ylab("Lots Available") + theme_stata() + scale_x_datetime(breaks = "3 hour", labels = date_format("%H:%M", tz = Sys.timezone(location = TRUE))) #+ theme(axis.text.x = element_text(angle =90))
       height <- session$clientData$output_p_height
       width <- session$clientData$output_p_width
       ggplotly(p, height = height, width = width)
     })
   })
+  
+  
   
 }
