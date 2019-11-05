@@ -14,11 +14,22 @@ get_collection <- function(collection="carpark",db = "test_db"){
         url=sprintf('mongodb+srv://%s:%s@james-cluster-bfs0h.gcp.mongodb.net',user,pass))
 }
 
-
-
-getCarpark<-function(mongo_collection=availabilityCollection, carpark_id, limit=100){
+getCarpark<-function(mongo_collection=get_collection(), carpark_id, limit=100){
   fields<-sprintf('{"%s" : 1, "time" :1, "_id" :0}', carpark_id) #query the carpark_id
-  mongo_collection$find('{}' , limit = limit, fields = fields, sort='{"time":-1}')
+  df<-mongo_collection$find('{}' , limit = limit, fields = fields, sort='{"time":-1}')
+  #for some reason, time is offset by 8 hours
+  seconds_offset <- 8 * 60 * 60
+  df$time <- df$time - seconds_offset
+  df
+}
+
+get_carpark_hourly<-function(mongo_collection=get_collection(), carpark_id, limit=100){
+  fields<-sprintf('{"%s" : 1, "time" :1, "_id" :0}', carpark_id) #query the carpark_id
+  df<-mongo_collection$find('{}' , limit = limit, fields = fields, sort='{"time":-1}')
+  #for some reason, time is offset by 8 hours
+  seconds_offset <- 8 * 60 * 60
+  df$time <- df$time - seconds_offset
+  df
 }
 
 getAllCarparks<-function(mongo_collection=get_collection(), limit=100, fake = FALSE){
@@ -28,13 +39,15 @@ getAllCarparks<-function(mongo_collection=get_collection(), limit=100, fake = FA
   else {
     #get latest carpark from mongo
     df<-mongo_collection$find('{}' , limit = limit, sort='{"time":-1}')
+    #for some reason, time is offset by 8 hours
+    seconds_offset <- 8 * 60 * 60
+    df$time <- df$time - seconds_offset
+    
     #reshape into tidy
     df %>% gather(key=carpark_name,value = avail_lots, -time)
   }
-
 }
 
 #in case mongo does not work
 # backup<-getAllCarparks(limit=1000)
 # backup %>% saveRDS("./data/backup")
-
