@@ -122,10 +122,9 @@ class TimedExecutor:
                 
 
             else:
-                print(f"Query time {query_time}")
-                print(f"Start time {start_time}")
+                print(f"Query time {query_time} has not happened yet")
                 #sleep for time_difference
-                time_difference = (query_time - start_time).total_seconds()
+                time_difference = (query_time - now_time).total_seconds()
                 print(f"Faster than current time, sleeping for {time_difference} seconds")
                 time.sleep(time_difference)
                 #Update the current time
