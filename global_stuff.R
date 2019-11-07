@@ -29,6 +29,16 @@ Sys.setenv(TZ="Asia/Singapore") #to avoid mongo messing up the timezone
 TIME_INTERVAL<-5 #5 minutes, used for prediction intervals
 #End James stuff
 
+# Load dataset which is run ech time user visits, so that it will be refreshed
+
+
+### run ONLY ONCE SO WE HAVE DEFAULT TIME VALUE
+latest_carpark_times<-getAllCarparks(limit=1, fake=fake)
+### load latest time from mongo and set it for all sessions
+latestTime<<-latest_carpark_times$time[[1]]
+
+
+
 #Phyllis stuff
 range_lat <- c(1.28967-1,1.28967+1)
 range_lng <- c(103.85007-1, 103.85007+1)
@@ -36,9 +46,8 @@ hdb_geo_info <- read.csv('data/hdb_available_query.csv') %>% arrange(car_park_no
 
 #add map overlay
 carpark_types = c('BASEMENT CAR PARK', 'MULTI-STOREY CAR PARK','SURFACE CAR PARK')
-
-
 #End phyllis stuff
 
 
-### End Static variables ###
+#Nicholas weather
+data_area <- read.csv("data/weather_area.csv")
