@@ -1,3 +1,86 @@
+.main-header .logo {
+  font-family: "Josefin Sans";
+  font-size: 24px;
+  text-transform: lowercase;
+}
+
+body{
+  font-family: 'Muli';
+  font-size: 13px;
+  text-transform: capitalize;
+}
+
+.skin-blue .main-header .logo{
+  background-color: #7e97a6;
+  color: white;
+}
+
+.skin-blue .main-header .navbar {
+    background-color: #7e97a6;
+}
+
+.skin-blue .main-header .logo:hover {
+    background-color: #9ca0a6;
+}
+
+.skin-blue .main-header .navbar .sidebar-toggle:hover {
+    background-color: #9ca0a6;
+}
+
+.sidebar {
+  color:black;
+  text-transform:lowercase;
+}
+
+.skin-blue .sidebar .a {
+  color: black;
+}
+
+.skin-blue .main-sidebar{
+    background-color: #f2f4f6;
+}
+
+.skin-blue .sidebar-menu>li>a {
+    border-left: 3px solid transparent;
+    color: #63707e;
+}
+
+.skin-blue .sidebar-menu>li.active>a{
+    color: black;
+    background: #eaf5ff;
+    border-left-color: #89a3b2;
+} 
+
+.skin-blue .sidebar-menu>li:hover>a {
+    color: black;
+    background: #eaf5ff;
+    border-left-color: #89a3b2;
+}
+
+.sidebar .action-button {
+  text-transform:lowercase;
+  font-size:13px;
+}
+
+.form-control {
+    border-radius: 4px;
+    font-size:13px;
+}
+
+.input-group .form-control:first-child {
+  font-size:13px;
+}
+
+.navbar-nav>.notifications-menu>.dropdown-menu>li .menu>li>a {
+  font-size:12px;
+}
+
+.navbar-nav>.notifications-menu>.dropdown-menu>li.header {
+  font-size:13px;
+  text-transform:lowercase;
+  font-weight:900;
+}
+
 .leaflet-label {
 	padding: 2px;
 }
