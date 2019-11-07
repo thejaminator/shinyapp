@@ -1,4 +1,4 @@
-source("global_stuff.R", local=TRUE)
+source("global.R", local=TRUE)
 server <- function(input, output, session, ...) {
   
   ###### START SETUP OF SESSION VARIABLES ########

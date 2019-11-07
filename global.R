@@ -24,7 +24,7 @@ source("modules/create_arima.R")
 ### Static variables ### Variables available to all sessions
 
 #James stuff
-fake<-TRUE #use fake=TRUE to avoid calling mongodb and use saved carpark data instead of realtime
+fake<-FALSE #use fake=TRUE to avoid calling mongodb and use saved carpark data instead of realtime
 Sys.setenv(TZ="Asia/Singapore") #to avoid mongo messing up the timezone
 TIME_INTERVAL<-5 #5 minutes, used for prediction intervals
 #End James stuff
@@ -33,7 +33,7 @@ TIME_INTERVAL<-5 #5 minutes, used for prediction intervals
 
 
 ### run ONLY ONCE SO WE HAVE DEFAULT TIME VALUE
-latestTime<-getAllCarparks(limit=1, fake=fake)$time[[1]]
+latestTime<<-getAllCarparks(limit=1, fake=fake)$time[[1]]
 
 ### load latest time from mongo and set it for all sessions
 # uniqueCarparks <- unique(getAllCarparks(limit=1, fake=fake)$carpark_name)
