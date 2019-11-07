@@ -25,18 +25,18 @@ get_prediction <- function(carparkAvail,latestTime){
 extrapolate_7days <- function(historical_data){
   #returns dataframe extrapolated by 7 days
   #Get subset of last 7 days
-  last_7_days <- historical_data  %>% subset(time > (historical_data$time[[1]] - as.difftime(7, unit="days")))
-  historical_data_copy<-last_7_days
+  historical_data <- historical_data  %>% subset(time > (historical_data$time[[1]] - as.difftime(7, unit="days")))
   #Extrapolate 7 days
-  historical_data_copy$time <- historical_data_copy$time + as.difftime(7, unit="days")
-  #return 14 days which includes the previous 7 days and the forward 7 days
-  return(rbind(historical_data_copy,historical_data))
+  historical_data$time <- historical_data$time + as.difftime(7, unit="days")
+  #return forward 7 days
+  historical_data
 }
 
 
 get_prediction_historical <- function(latestTime, carparkAvail, historical_data ){
   #alligns the data and time with historical data and gets the availability
   #depends on global latestTime
+  #deprecate cos too memory instensive
   while (latestTime > historical_data$time[[1]] - as.difftime(1, unit="days")){ #need at least 1 day in advance data
     historical_data<-extrapolate_7days(historical_data)
   }
@@ -45,8 +45,7 @@ get_prediction_historical <- function(latestTime, carparkAvail, historical_data 
   historical_data$is_pred<-TRUE
   #drop extrapolated data before the current date
   historical_data<- historical_data %>% subset(time >latestTime)
-  prediction<-rbind(historical_data,carparkAvail)
-  return (prediction)
+  rbind(historical_data,carparkAvail)
 }
 
 
@@ -59,6 +58,7 @@ get_day_hour<-function(time_object){
 
 
 get_prediction_historical_2<-function(latestTime, carparkAvail, historical_data){
+  #deprecate cos too buggy?
   #need to get time range of 5 min from now...
   start_day_hour<-(latestTime +as.difftime(TIME_INTERVAL, unit="mins"))%>% get_day_hour
   #query a carpark time to get the time
@@ -81,6 +81,19 @@ get_prediction_historical_2<-function(latestTime, carparkAvail, historical_data)
   carparkAvail$is_pred<-FALSE
   historical_data$is_pred<-TRUE
   #output combined dataframe
+  rbind(carparkAvail,historical_data)
+}
+
+get_prediction_historical_3<-function(latestTime, carparkAvail, historical_data){
+  #actually, we don't use latestTime but it is an argument for consistency
+  #historical_data is not used, assuming we are using mongo
+  
+  #add is_pred column for ggplot
+  carparkAvail$is_pred<-FALSE
+  historical_data<-get_6_days_ago()
+  #shift time window to predict next day
+  historical_data$time <-historical_data$time + as.difftime(7, unit="days")
+  historical_data$is_pred<-TRUE
   rbind(carparkAvail,historical_data)
 }
 ## Use this to update historical_data

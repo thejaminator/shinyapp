@@ -8,7 +8,12 @@ library(lubridate)
 library(plotly)
 library(shinyFeedback)
 
+## get latest time. Making it a function makes the ui check for latest time every time a page is requested
+get_latest_time <- function(){
+  latestTime
+}
 
+ui_time<-get_latest_time()
 
 ui <- fluidPage(tags$head(
   #set up css
@@ -24,8 +29,8 @@ ui <- fluidPage(tags$head(
 
 dashboardPage(
   dashboardHeader(
-    title = "parkwhere.sg",
-    dropdownMenuOutput('weather_menu')
+    dropdownMenuOutput('weather_menu'),
+    title = "parkwhere.sg"
   ),
   dashboardSidebar(
     sidebarMenu(
@@ -35,11 +40,12 @@ dashboardPage(
               label= "Postal Code/Address",
               value = "-"
     ),
+
     sliderInput(inputId = 'chosen_time', 
                                  label = 'time to predict', 
-                                 value = as.POSIXct(latestTime), 
-                                 min = as.POSIXct(latestTime), 
-                                 max = as.POSIXct(latestTime) + 24*60*60, 
+                                 value = as.POSIXct(ui_time), 
+                                 min = as.POSIXct(ui_time), 
+                                 max = as.POSIXct(ui_time) + 24*60*60, 
                                  step = 30*60, 
                                  ticks = FALSE,
                                  timeFormat = "%m/%d/%Y %I:%M %p"),
