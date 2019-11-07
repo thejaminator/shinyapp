@@ -3,15 +3,15 @@ server <- function(input, output, session, ...) {
   
   # Load dataset which is run ech time user visits, so that it will be refreshed
   ### load carpark available dataset from mongo only when initialized
-  carparkAvail<-getAllCarparks(limit=288, fake=FALSE)
+  carparkAvail<-getAllCarparks(limit=288, fake=TRUE)
   uniqueCarparks <- unique(carparkAvail$carpark_name)
   ### load latest time from mongo
   latestTime<-carparkAvail$time[[1]]
   
   ### get predicted carpark info
-  prediction<-get_prediction_historical(latestTime=latestTime, carparkAvail=carparkAvail,
-                                        historical_data=readRDS("./data/backup")
-)
+  prediction<-get_prediction_historical_2(latestTime=latestTime, carparkAvail=carparkAvail,
+                                        historical_data=readRDS("./data/backup"))
+                                        
 
   #reactive time chosen based on sidebar for predictions
   chosen_time <- reactive({
@@ -26,6 +26,8 @@ server <- function(input, output, session, ...) {
     hdb_geo_info$avail_lots <- get_avail_lots(index_df=hdb_geo_info,avail_df=prediction,latest_time=chosen_time())$avail_lots
     #somehow there is n.a in the dataframe availability
     hdb_geo_info <- hdb_geo_info %>% filter(!is.na(avail_lots))
+    #add info of whether carpark should be green, orange, red for use in sidebar filter
+    hdb_geo_info$lot_avail_colour <- hdb_geo_info$avail_lots %>% sapply(get_colour)
     return(hdb_geo_info)
   })
 
@@ -33,14 +35,16 @@ server <- function(input, output, session, ...) {
   #Make reactive filtered dataset based on inputs in sidebar
   carpark_info_reactive <- reactive({
     cat("Debug: updating carpark filter\n")
+    cat(input$chosen_avail)
     hdb_geo_info_reactive() %>%
-      filter(car_park_type %in% input$chosen_carparks)
+      filter(car_park_type %in% input$chosen_carparks) %>%
+      filter(lot_avail_colour %in% input$chosen_avail) #filter based on colour
   })
   
   # need to recalculate icons based on filters
   icons_reactive <- reactive({
     cat("Debug: getting icons\n")
-    get_icons(carpark_info_reactive(), avail_lots=avail_lots)
+    get_icons(carpark_info_reactive())
   })
   
   #this is only rendered only once
@@ -56,8 +60,12 @@ server <- function(input, output, session, ...) {
       clearMarkers() %>%
       clearMarkerClusters() %>%
       {if (nrow(data) > 0)
-        addAwesomeMarkers(map =. ,lng = ~lon, lat = ~lat, clusterOptions = markerClusterOptions(disableClusteringAtZoom = 16), icon=icons_reactive(),
-                          layerId =~car_park_no,label = ~htmlEscape(paste(avail_lots)), labelOptions = labelOptions(noHide = T))
+        addAwesomeMarkers(map =. ,lng = ~lon, lat = ~lat, 
+                          clusterOptions = markerClusterOptions(disableClusteringAtZoom = 16), 
+                          icon=icons_reactive(),
+                          layerId =~car_park_no,label = ~htmlEscape(paste(avail_lots)),
+                          labelOptions = labelOptions(noHide = T, direction = "bottom", 
+                                                      className = "leaflet-label"))
         else cat("nothing to display. This if else statement exists to prevent crash\n")}
   
   })

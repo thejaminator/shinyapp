@@ -1,31 +1,12 @@
-.main-header .logo {
-  font-family: "Lobster", cursive;
-  font-weight: bold;
-  font-size: 24px;
+.leaflet-label {
+	padding: 2px;
 }
 
-.skin-blue .main-header .logo{
-  background-color: #003366;
+.awesome-marker-icon-red{
+	opacity: 0.2 !important;
 }
 
-.skin-blue .main-header .navbar{
-  background-color: #003366;
+.awesome-marker-icon-orange{
+	opacity: 0.8 !important;
 }
 
-.skin-blue .main-sidebar .sidebar .sidebar-menu .active a{
-  font-family: "Lobster", cursive;
-  background-color: white;
-  color: black;
-}
-
-.skin-blue .main-sidebar .sidebar .sidebar-menu a{
-  font-family: "Lobster", cursive;
-  background-color: black;
-  color: orange;
-}
-
-.skin-blue .main-sidebar .sidebar .sidebar-menu a:hover{
-  font-family: "Lobster", cursive;
-  background-color:brown;
-  color:white;
-}

@@ -3,6 +3,7 @@ library(ggplot2)
 library(forecast)
 library(xts)
 library(stats)
+library(magrittr)
 source("modules/mongo.R")
 
 ##this file handles prediction logic
@@ -50,7 +51,37 @@ get_prediction_historical <- function(latestTime, carparkAvail, historical_data 
 }
 
 
+get_day_hour<-function(time_object){
+  day<- time_object %>% wday %>% as.character()
+  hours<-time_object %>% hour() %>% as.character()
+  minutes<- time_object %>% minute() %>% as.character()
+  return (paste0(day,hours,minutes))
+}
 
+
+get_prediction_historical_2<-function(latestTime, carparkAvail, historical_data){
+  #need to get time range of 5 min from now...
+  start_day_hour<-(latestTime +as.difftime(TIME_INTERVAL, unit="mins"))%>% get_day_hour
+  #query a carpark time to get the time
+  slice<-historical_data%>%filter(carpark_name=="HE12_C") %>% 
+    select(time)
+  slice$time <- slice$time 
+  historical_start<-slice %>%
+                    mutate(day_hour=get_day_hour(time) ) %>%
+                    filter(day_hour == (start_day_hour)) %>% .$time
+  historical_end <-historical_start + as.difftime(1, unit="days")
+  
+  predicted<-historical_data %>% filter(time >= historical_start) %>% filter(time<=historical_end)
+  time_difference<-latestTime - historical_start +as.difftime(TIME_INTERVAL, unit="mins")
+  predicted$time <-predicted$time +time_difference
+  
+  
+  #add is_pred column for ggplot
+  carparkAvail$is_pred<-FALSE
+  predicted$is_pred<-TRUE
+  
+  rbind(carparkAvail,predicted)
+}
 ## Use this to update historical_data
 # historical_data<-getAllCarparks(limit=2016)
 # historical_data %>% saveRDS("./data/backup")
