@@ -13,6 +13,7 @@ library(ggthemes)
 library(scales)
 
 
+
 # load module functions
 source("modules/mongo.R")
 source("modules/map_functions.R")
@@ -25,6 +26,7 @@ source("modules/create_arima.R")
 #James stuff
 fake<-TRUE #use fake=TRUE to avoid calling mongodb and use saved carpark data instead of realtime
 Sys.setenv(TZ="Asia/Singapore") #to avoid mongo messing up the timezone
+TIME_INTERVAL<-5 #5 minutes, used for prediction intervals
 #End James stuff
 
 #Phyllis stuff

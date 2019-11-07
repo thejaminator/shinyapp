@@ -25,13 +25,14 @@ ui <- dashboardPage(
                                      timeInput(inputId = 'chosen_time',"Time: ",value = Sys.time(), minute.steps = 30))
                      ),
     checkboxGroupInput(inputId = 'chosen_carparks', "Carpark Type:",carpark_types, selected = carpark_types),
-    radioButtons(inputId = "format",label="Carpark Availability",
-                 choices = c("Green","Yellow","Red")),
+    checkboxGroupInput(inputId = "chosen_avail",label="Carpark Availability",
+                       choiceNames = c("Green > 50","Orange > 20","Red < 20"), choiceValues = c("green", "orange", "red"), 
+                       selected = c("green","orange","red")),
     actionButton('button', 'Show carparks')
   ),
   
   dashboardBody(
-    # tags$head(tags$link(rel="stylesheet", type = "text/css", href = "custom.css")),
+    tags$head(tags$link(rel="stylesheet", type = "text/css", href = "custom.css")),
     
     useShinyFeedback(),
     tabItems(
@@ -40,7 +41,8 @@ ui <- dashboardPage(
                 column(5, plotlyOutput(outputId = "plot")), 
                 column (5, tableOutput('table'), htmlOutput('link')),
                 column(2, textOutput('weather'), textOutput('temp'))
-              )),
+              )
+              ),
       tabItem(tabName='predict', h2('output another map'))
     )
   )

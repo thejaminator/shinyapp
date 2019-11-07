@@ -39,11 +39,14 @@ get_colour <- function(avail_lots) {
 }
 
 
-get_icons <- function(df, avail_lots){
+get_icons <- function(df){
   awesomeIcons(
-  icon = 'ios-close',
-  iconColor = 'black',
-  library = 'ion',
+  # icon = 'ios-close',
+  # iconColor = 'black',
+  # library = 'ion',
+    icon = 'car',
+    iconColor = 'black',
+    library = 'fa',
   markerColor = sapply(df$avail_lots, get_colour)
 )
 }
