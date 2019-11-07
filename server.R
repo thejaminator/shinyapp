@@ -52,7 +52,7 @@ server <- function(input, output, session, ...) {
   #this is only rendered only once
   output$map <- renderLeaflet({
       map <- leaflet() %>% addTiles(options = tileOptions(useCache = TRUE, crossOrigin = TRUE)) %>% 
-        setView(lng = 103.7499, lat =1.350867, zoom  = 12) 
+        setView(lng = 103.8198, lat =1.3521, zoom  = 12)
     }) 
   
   
