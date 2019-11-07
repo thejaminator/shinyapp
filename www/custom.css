@@ -1,3 +1,16 @@
+.container-fluid {
+  padding-right: 0px;
+  padding-left: 0px;
+}
+
+#map {
+  height: 80vh !important;
+}
+
+.content {
+  padding: 0px;
+}
+
 .main-header .logo {
   font-family: "Josefin Sans";
   font-size: 24px;

@@ -1,4 +1,4 @@
-source("global_stuff.R", local=TRUE)
+source("global.R", local=TRUE)
 server <- function(input, output, session, ...) {
   
   ###### START SETUP OF SESSION VARIABLES ########
@@ -11,10 +11,18 @@ server <- function(input, output, session, ...) {
   latestTime<<-getAllCarparks(limit=1, fake=fake)$time[[1]]
   
   ### get predicted carpark info
-  prediction<-get_prediction_historical_2(latestTime=latestTime, carparkAvail=getAllCarparks(limit=288, fake=fake),
-                                        historical_data=readRDS("./data/backup"))
-                                        
+  if (fake){
+    prediction<-get_prediction_historical(latestTime=latestTime, carparkAvail=getAllCarparks(limit=288, fake=fake),
+                                            historical_data=readRDS("./data/backup"))
+  }
+  else {
+    prediction<-get_prediction_historical_3(latestTime=latestTime, carparkAvail=getAllCarparks(limit=288, fake=fake),
+                                            historical_data=readRDS("./data/backup"))
+  }
 
+    
+  
+  
   #reactive time chosen based on sidebar for predictions
   chosen_time <- reactive({
     input$chosen_time
@@ -50,8 +58,13 @@ server <- function(input, output, session, ...) {
   
   #this is only rendered only once
   output$map <- renderLeaflet({
-      map <- leaflet() %>% addTiles(options = tileOptions(useCache = TRUE, crossOrigin = TRUE)) %>% 
-        setView(lng = 103.8198, lat =1.3521, zoom  = 12)
+      map <- leaflet() %>% leaflet.extras::enableTileCaching() %>%
+        addTiles(options = tileOptions(useCache = TRUE, crossOrigin = TRUE)) %>% 
+        setView(lng = 103.8198, lat =1.3521, zoom  = 12) %>%
+        addEasyButton(easyButton(
+          icon="fa-crosshairs", title="Locate Me",
+          onClick=JS("function(btn, map){ map.locate({setView: true}); }")))
+      
     }) 
   
   

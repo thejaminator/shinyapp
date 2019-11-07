@@ -24,14 +24,14 @@ getCarpark<-function(mongo_collection=get_collection(), carpark_id, limit=100){
   df
 }
 
-get_carpark_hourly<-function(mongo_collection=get_collection(), carpark_id, limit=100){
-  fields<-sprintf('{"%s" : 1, "time" :1, "_id" :0}', carpark_id) #query the carpark_id
-  df<-mongo_collection$find('{}' , limit = limit, fields = fields, sort='{"time":-1}')
-  #for some reason, time is offset by 8 hours
-  seconds_offset <- 8 * 60 * 60
-  df$time <- df$time - seconds_offset
-  df
-}
+# get_carpark_hourly<-function(mongo_collection=get_collection(), carpark_id, limit=100){
+#   fields<-sprintf('{"%s" : 1, "time" :1, "_id" :0}', carpark_id) #query the carpark_id
+#   df<-mongo_collection$find('{}' , limit = limit, fields = fields, sort='{"time":-1}')
+#   #for some reason, time is offset by 8 hours
+#   seconds_offset <- 8 * 60 * 60
+#   df$time <- df$time - seconds_offset
+#   df
+# }
 
 getAllCarparks<-function(mongo_collection=get_collection(), limit=1000, fake = FALSE){
   if (fake == TRUE){
@@ -50,6 +50,23 @@ getAllCarparks<-function(mongo_collection=get_collection(), limit=1000, fake = F
   }
 }
 
+
+get_6_days_ago<-function(mongo_collection=get_collection(), limit=288, fake = FALSE){
+  if (fake == TRUE){
+    return(readRDS("./data/backup"))
+  }
+  else {
+    #1 day worht of data = 288. 6 days ago means skip 6* 288
+    df<-mongo_collection$find('{}' , limit = limit, sort='{"time":-1}',skip=1728)
+    cat("Debug: Mongo data retrieval success!\n")
+    #for some reason, time is offset by 8 hours
+    seconds_offset <- 8 * 60 * 60
+    df$time <- df$time - seconds_offset
+    
+    #reshape into tidy
+    df %>% gather(key=carpark_name,value = avail_lots, -time)
+  }
+}
 # in case mongo does not work
 # carparkAvail<-getAllCarparks(limit=2016)
 # carparkAvail %>% saveRDS("./data/backup")
