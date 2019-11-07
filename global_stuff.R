@@ -11,7 +11,7 @@ library(data.table)
 library(htmltools)
 library(ggthemes)
 library(scales)
-
+#for debug library(profvis)
 
 
 # load module functions
@@ -33,11 +33,10 @@ TIME_INTERVAL<-5 #5 minutes, used for prediction intervals
 
 
 ### run ONLY ONCE SO WE HAVE DEFAULT TIME VALUE
-latest_carpark_times<-getAllCarparks(limit=1, fake=fake)
+latestTime<-getAllCarparks(limit=1, fake=fake)$time[[1]]
+
 ### load latest time from mongo and set it for all sessions
-latestTime<<-latest_carpark_times$time[[1]]
-
-
+# uniqueCarparks <- unique(getAllCarparks(limit=1, fake=fake)$carpark_name)
 
 #Phyllis stuff
 range_lat <- c(1.28967-1,1.28967+1)
