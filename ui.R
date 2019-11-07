@@ -6,8 +6,9 @@ library(shinydashboardPlus)
 library(hms)
 library(lubridate)
 library(plotly)
+library(shinyFeedback)
 
-source("global_stuff.R", local=FALSE)
+
 
 ui <- fluidPage(tags$head(
   #set up css
@@ -58,8 +59,8 @@ dashboardPage(
       tabItem(tabName='current', leafletOutput('map'), 
               fluidRow(
                 column(5, plotlyOutput(outputId = "plot")), 
-                column (4, tableOutput('table'), htmlOutput('link')),
-                column(3, tableOutput('weather'))
+                column (5, tableOutput('table'), htmlOutput('link')),
+                column(2, tableOutput('weather'), textOutput("temp"), uiOutput("img"))
               ))
     )
   )

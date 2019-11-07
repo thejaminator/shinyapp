@@ -8,7 +8,6 @@ source("modules/mongo.R")
 
 ##this file handles prediction logic
 
-
 get_prediction <- function(carparkAvail,latestTime){
   #get past one week data as carparkAvail
   #predict by taking t-7days
@@ -71,16 +70,18 @@ get_prediction_historical_2<-function(latestTime, carparkAvail, historical_data)
                     filter(day_hour == (start_day_hour)) %>% .$time
   historical_end <-historical_start + as.difftime(1, unit="days")
   
-  predicted<-historical_data %>% filter(time >= historical_start) %>% filter(time<=historical_end)
-  time_difference<-latestTime - historical_start +as.difftime(TIME_INTERVAL, unit="mins")
-  predicted$time <-predicted$time +time_difference
+  historical_data<-historical_data %>% filter(time >= historical_start) %>% filter(time<=historical_end)
   
+  time_difference<-latestTime - historical_start +as.difftime(TIME_INTERVAL, unit="mins")
+  
+  #shift time window to predict next 7 days
+  historical_data$time <-historical_data$time +time_difference
   
   #add is_pred column for ggplot
   carparkAvail$is_pred<-FALSE
-  predicted$is_pred<-TRUE
-  
-  rbind(carparkAvail,predicted)
+  historical_data$is_pred<-TRUE
+  #output combined dataframe
+  rbind(carparkAvail,historical_data)
 }
 ## Use this to update historical_data
 # historical_data<-getAllCarparks(limit=2016)

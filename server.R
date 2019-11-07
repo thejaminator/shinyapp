@@ -1,4 +1,4 @@
-source("global_stuff.R", local=FALSE)
+source("global_stuff.R", local=TRUE)
 server <- function(input, output, session, ...) {
   
   ###### START SETUP OF SESSION VARIABLES ########
@@ -6,13 +6,12 @@ server <- function(input, output, session, ...) {
   
   # Load dataset which is run ech time user visits, so that it will be refreshed
   ### load carpark available dataset from mongo only when initialized
-  carparkAvail<-getAllCarparks(limit=288, fake=fake)
-  uniqueCarparks <- unique(carparkAvail$carpark_name)
+  # carparkAvail<-getAllCarparks(limit=288, fake=fake)
   ### load latest time from mongo and set it for all sessions
-  latestTime<<-carparkAvail$time[[1]]
+  latestTime<<-getAllCarparks(limit=1, fake=fake)$time[[1]]
   
   ### get predicted carpark info
-  prediction<-get_prediction_historical_2(latestTime=latestTime, carparkAvail=carparkAvail,
+  prediction<-get_prediction_historical_2(latestTime=latestTime, carparkAvail=getAllCarparks(limit=288, fake=fake),
                                         historical_data=readRDS("./data/backup"))
                                         
 
@@ -54,7 +53,6 @@ server <- function(input, output, session, ...) {
       map <- leaflet() %>% addTiles(options = tileOptions(useCache = TRUE, crossOrigin = TRUE)) %>% 
         setView(lng = 103.8198, lat =1.3521, zoom  = 12)
     }) 
-  
   
   
   
@@ -135,7 +133,7 @@ server <- function(input, output, session, ...) {
     
     # create link for google maps directions
     carpark_link <- specific_carpark_data[,c(11:12)]
-    output$link <-renderText(paste0("<a href = https://www.google.com/maps?daddr=", carpark_link$lat,",", carpark_link$lon,"> Go to Google Maps for Directions </a>"))
+    gmaps_link <- paste0("<a href = https://www.google.com/maps?daddr=", carpark_link$lat,",", carpark_link$lon,"> Go there now </a>")
     
     #get weather information regarding the selected marker and display it
     url3 <- "https://api.openweathermap.org/data/2.5/weather?"
@@ -145,10 +143,30 @@ server <- function(input, output, session, ...) {
     units <- "&units=metric"
     url_comp <-paste0(url3,lat,lon,appID,units)
     weather_data <- fromJSON(url_comp)
-    weather_table <- data.frame('Weather' = weather_data$weather$main, 'Temperature' = paste(weather_data$main$temp, '\u00B0C'))
+    weather_table <- data.frame('Weather' = weather_data$weather$main, 'Temperature' = paste(weather_data$main$temp, '\u00B0C'), 'Directions' = gmaps_link)
     icon_table <- gather(weather_table,'','')
-    icon_table[,1] <- c(as.character(icon('cloud')), as.character(icon('thermometer-2')))
+    icon_table[,1] <- c(as.character(icon('cloud')), as.character(icon('thermometer-2')), as.character(icon('car')))
     output$weather <- renderTable(icon_table, sanitize.text.function = function(x) x)
+    
+    #render weather images
+    output$img <- renderUI({
+      if (weather_data$weather$id == 800) { # Clear Sky
+        tags$img(height=100,width=100,src= "http://openweathermap.org/img/wn/01d@2x.png")
+      } else if (between(weather_data$weather$id,200,299) == T) { #Thunderstorm
+        tags$img(height=100,width=100, src = "http://openweathermap.org/img/wn/11d@2x.png")
+      } else if (between(weather_data$weather$id,300,399) == T) { #Drizzle
+        tags$img(height=100,width=100, src = "http://openweathermap.org/img/wn/09d@2x.png")
+      } else if (between(weather_data$weather$id,500,599) == T) { #Rain
+        tags$img(height=50,width=50, src = "http://openweathermap.org/img/wn/10d@2x.png")
+      } else if (between(weather_data$weather$id,600,699) == T) { #Snow
+        tags$img(height=50,width=50, src = "http://openweathermap.org/img/wn/13d@2x.png")
+      } else if (between(weather_data$weather$id,700,799) == T) { #Mist, Haze etc.
+        tags$img(height=50,width=50, src = "http://openweathermap.org/img/wn/50d@2x.png")
+      } else if (between(weather_data$weather$id, 801, 899) == T) {
+        tags$img(height=50,width=50, src = "https://image.flaticon.com/icons/svg/1163/1163726.svg")
+      }
+    }
+    )
     
     
     plot_data <- prediction %>% 
@@ -157,11 +175,15 @@ server <- function(input, output, session, ...) {
       filter(time < latestTime + as.difftime(1, unit="days"))# get one day before and one day after forecast
     #plot the graph
     output$plot <- renderPlotly({
-      p <- ggplot(data = plot_data) + geom_line(aes(x = time, y = avail_lots, colour = is_pred, group = 1, text = paste0("Available Lots: ", avail_lots))) + xlab("Time") + ylab("Lots Available") + theme_stata() + scale_x_datetime(breaks = "3 hour", labels = date_format("%H:%M", tz = Sys.timezone(location = TRUE))) + theme(text = element_text(family= "Muli"))
+      p <- ggplot(data = plot_data) + geom_line(aes(x = time, y = avail_lots, group = is_pred,
+              text = paste0("Available Lots: ", avail_lots, "\nTime: ", time), linetype=is_pred, color=is_pred)) + xlab("Time") +
+        ylab("Lots Available") + theme_stata() + scale_x_datetime(breaks = "4 hour",
+            labels = date_format("%l %p")) + theme(text = element_text(family= "Muli"), legend.position = "none", axis.text.x = element_text(angle=60))
       height <- session$clientData$output_p_height
       width <- session$clientData$output_p_width
       gg <- ggplotly(p, tooltip = "text", height = height, width = width)
-      gg <- style(gg, line= list(color = '#89a3b2', width = 1.5))
+      #controlling the style
+      # gg <- style(gg, line= list(width = 1.5))
     })
   })
   
