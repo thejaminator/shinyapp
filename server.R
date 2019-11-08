@@ -188,13 +188,16 @@ server <- function(input, output, session, ...) {
       filter(time < latestTime + as.difftime(1, unit="days"))# get one day before and one day after forecast
     #plot the graph
     output$plot <- renderPlotly({
-      p <- ggplot(data = plot_data) + geom_line(aes(x = time, y = avail_lots, group = is_pred,
-              text = paste0("Available Lots: ", avail_lots, "\nTime: ", time), linetype=is_pred, color=is_pred)) + xlab("Time") +
-        ylab("Lots Available") + theme_stata() + scale_x_datetime(breaks = "4 hour",
-            labels = date_format("%l %p")) + theme(text = element_text(family= "Muli"), legend.position = "none", axis.text.x = element_text(angle=60))
+      p <- ggplot(data = plot_data, aes(x = time, y = avail_lots, ymax = avail_lots, ymin=0, group = is_pred, text = paste0("Available Lots: ", avail_lots, "\nTime: ", time))) + 
+              geom_line(aes(linetype=is_pred, color=is_pred)) +
+              geom_ribbon(aes(fill=is_pred),alpha=0.5) + xlab("Time") +
+            ylab("Lots Available") + theme_stata() + scale_x_datetime(breaks = "4 hour",
+            labels = date_format("%l %p")) + 
+      theme(text = element_text(family= "Muli"), legend.position = "none", axis.text.x = element_text(angle=60), panel.background = element_blank())
       height <- session$clientData$output_p_height
       width <- session$clientData$output_p_width
       gg <- ggplotly(p, tooltip = "text", height = height, width = width)
+      gg %>% layout(xaxis=list(fixedrange=TRUE)) %>%  layout(yaxis=list(fixedrange=TRUE)) #fix the range of plotly
       #controlling the style
       # gg <- style(gg, line= list(width = 1.5))
     })
