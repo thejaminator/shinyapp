@@ -1,8 +1,3 @@
-library(dplyr)
-library(ggplot2)
-library(forecast)
-library(xts)
-library(stats)
 library(magrittr)
 source("modules/mongo.R")
 
