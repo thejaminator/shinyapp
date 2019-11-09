@@ -146,7 +146,7 @@ server <- function(input, output, session, ...) {
     
     # create link for google maps directions
     carpark_link <- specific_carpark_data[,c(11:12)]
-    gmaps_link <- paste0("<a href = https://www.google.com/maps?daddr=", carpark_link$lat,",", carpark_link$lon,"> Go there now </a>")
+    gmaps_link <- paste0("https://www.google.com/maps?daddr=", carpark_link$lat,",", carpark_link$lon)
     
     #get weather information regarding the selected marker and display it
     url3 <- "https://api.openweathermap.org/data/2.5/weather?"
@@ -156,7 +156,7 @@ server <- function(input, output, session, ...) {
     units <- "&units=metric"
     url_comp <-paste0(url3,lat,lon,appID,units)
     weather_data <- fromJSON(url_comp)
-    weather_table <- data.frame('Weather' = weather_data$weather$main, 'Temperature' = paste(weather_data$main$temp, '\u00B0C'), 'Directions' = gmaps_link)
+    weather_table <- data.frame('Weather' = weather_data$weather$main, 'Temperature' = paste(weather_data$main$temp, '\u00B0C'), 'Directions' = "Click Me for Directions!")
     icon_table <- gather(weather_table,'','')
     
     ##Respective Weather images as icons for weather description. 
@@ -177,7 +177,7 @@ server <- function(input, output, session, ...) {
     }
   
     icon_table[,1] <- c((as.character(images)),as.character(icon('thermometer-2')),
-    as.character(tags$img(src="https://image.flaticon.com/icons/svg/355/355980.svg",height=30,width=30)))
+                        as.character(tags$a(tags$img(src="https://image.flaticon.com/icons/svg/355/355980.svg",height=30,width=30),href=gmaps_link)))
     output$weather <- renderTable(icon_table, sanitize.text.function = function(x) x)
     
 
