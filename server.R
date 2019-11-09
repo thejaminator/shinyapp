@@ -158,28 +158,30 @@ server <- function(input, output, session, ...) {
     weather_data <- fromJSON(url_comp)
     weather_table <- data.frame('Weather' = weather_data$weather$main, 'Temperature' = paste(weather_data$main$temp, '\u00B0C'), 'Directions' = gmaps_link)
     icon_table <- gather(weather_table,'','')
-    icon_table[,1] <- c(as.character(icon('cloud')), as.character(icon('thermometer-2')), as.character(icon('car')))
+    
+    ##Respective Weather images as icons for weather description. 
+    images<- if (weather_data$weather$id == 800) { # Clear Sky
+      tags$img(height=30,width=30,src= "http://openweathermap.org/img/wn/01d@2x.png")
+    } else if (between(weather_data$weather$id,200,299) == T) { #Thunderstorm
+      tags$img(height=30,width=30, src = "http://openweathermap.org/img/wn/11d@2x.png")
+    } else if (between(weather_data$weather$id,300,399) == T) { #Drizzle
+      tags$img(height=30,width=30, src = "http://openweathermap.org/img/wn/09d@2x.png")
+    } else if (between(weather_data$weather$id,500,599) == T) { #Rain
+      tags$img(height=30,width=30, src = "http://openweathermap.org/img/wn/10d@2x.png")
+    } else if (between(weather_data$weather$id,600,699) == T) { #Snow
+      tags$img(height=30,width=30, src = "http://openweathermap.org/img/wn/13d@2x.png")
+    } else if (between(weather_data$weather$id,700,799) == T) { #Mist, Haze etc.
+      tags$img(height=30,width=30, src = "http://openweathermap.org/img/wn/50d@2x.png")
+    } else if (between(weather_data$weather$id, 801, 899) == T) {
+      tags$img(height=30,width=30, src = "https://image.flaticon.com/icons/svg/1163/1163726.svg")
+    }
+  
+    icon_table[,1] <- c((as.character(images)),as.character(icon('thermometer-2')),
+    as.character(tags$img(src="https://image.flaticon.com/icons/svg/355/355980.svg",height=30,width=30)))
     output$weather <- renderTable(icon_table, sanitize.text.function = function(x) x)
     
-    #render weather images
-    output$img <- renderUI({
-      if (weather_data$weather$id == 800) { # Clear Sky
-        tags$img(height=100,width=100,src= "http://openweathermap.org/img/wn/01d@2x.png")
-      } else if (between(weather_data$weather$id,200,299) == T) { #Thunderstorm
-        tags$img(height=100,width=100, src = "http://openweathermap.org/img/wn/11d@2x.png")
-      } else if (between(weather_data$weather$id,300,399) == T) { #Drizzle
-        tags$img(height=100,width=100, src = "http://openweathermap.org/img/wn/09d@2x.png")
-      } else if (between(weather_data$weather$id,500,599) == T) { #Rain
-        tags$img(height=50,width=50, src = "http://openweathermap.org/img/wn/10d@2x.png")
-      } else if (between(weather_data$weather$id,600,699) == T) { #Snow
-        tags$img(height=50,width=50, src = "http://openweathermap.org/img/wn/13d@2x.png")
-      } else if (between(weather_data$weather$id,700,799) == T) { #Mist, Haze etc.
-        tags$img(height=50,width=50, src = "http://openweathermap.org/img/wn/50d@2x.png")
-      } else if (between(weather_data$weather$id, 801, 899) == T) {
-        tags$img(height=50,width=50, src = "https://image.flaticon.com/icons/svg/1163/1163726.svg")
-      }
-    }
-    )
+
+    
     
     
     plot_data <- prediction %>% 
