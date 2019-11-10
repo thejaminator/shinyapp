@@ -25,9 +25,23 @@ source("modules/create_arima.R")
 ### Static variables ### Variables available to all sessions
 
 #James stuff
-fake<-TRUE #use fake=TRUE to avoid calling mongodb and use saved carpark data instead of realtime
+fake<-FALSE #use fake=TRUE to avoid calling mongodb and use saved carpark data instead of realtime
 Sys.setenv(TZ="Asia/Singapore") #to avoid mongo messing up the timezone
 TIME_INTERVAL<-5 #5 minutes, used for prediction intervals
+
+#initially query carpark and store on server
+### get predicted carpark info
+
+latestTime<-getAllCarparks(limit=1, fake=fake)$time[[1]]
+
+if (fake){
+prediction<-get_prediction_historical(latestTime=latestTime, carparkAvail=getAllCarparks(limit=288, fake=fake),
+                                        historical_data=readRDS("./data/backup"))
+}else {
+prediction<-get_prediction_historical_3(latestTime=latestTime, carparkAvail=getAllCarparks(limit=288, fake=fake),
+historical_data=readRDS("./data/backup"))
+}
+
 #End James stuff
 
 # Load dataset which is run ech time user visits, so that it will be refreshed

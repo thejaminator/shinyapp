@@ -13,7 +13,6 @@ get_latest_time <- function(){
   latestTime
 }
 
-ui_time<-get_latest_time()
 
 ui <- fluidPage(tags$head(
   #set up css
@@ -34,21 +33,22 @@ dashboardPage(
   ),
   dashboardSidebar(
     sidebarMenu(
-      menuItem("Current", tabName = 'current' )
+      menuItem("carpark lot availability", tabName = 'current' )
     ),
     textInput(inputId = 'address',
               label= "Postal Code/Address",
               value = "-"
     ),
 
-    sliderInput(inputId = 'chosen_time', 
-                                 label = 'time to predict', 
-                                 value = as.POSIXct(ui_time), 
-                                 min = as.POSIXct(ui_time), 
-                                 max = as.POSIXct(ui_time) + 24*60*60, 
-                                 step = 30*60, 
-                                 ticks = FALSE,
-                                 timeFormat = "%m/%d/%Y %I:%M %p"),
+    # sliderInput(inputId = 'chosen_time',
+    #                              label = 'time to predict',
+    #                              value = as.POSIXct(get_latest_time()),
+    #                              min = as.POSIXct(get_latest_time()),
+    #                              max = as.POSIXct(get_latest_time()) + 24*60*60,
+    #                              step = 30*60,
+    #                              ticks = FALSE,
+    #                              timeFormat = "%m/%d/%Y %I:%M %p"),
+    uiOutput("time_control"),
     checkboxGroupInput(inputId = 'chosen_carparks', 
                        label = "Carpark Type:", 
                        choices = carpark_types, 
