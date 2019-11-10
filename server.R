@@ -142,7 +142,9 @@ server <- function(input, output, session, ...) {
     specific_carpark_data <- carpark_info_reactive()[carpark_info_reactive()$car_park_no==input$map_marker_click$id,]
     carpark_table <- specific_carpark_data[,c(1:7)]
     colnames(carpark_table) <- c('Car Park No.', 'Address', 'Car Park Type', 'Type of Parking System','Short-Term Parking', 'Free Parking', 'Night Parking')
-    output$table <- renderTable(gather(carpark_table,'',''))
+    carpark_table2<-gather(carpark_table,'','')
+    names(carpark_table2) <-c("Carpark Information"," ")
+    output$table <- renderTable(carpark_table2, align = "l")
     
     # create link for google maps directions
     carpark_link <- specific_carpark_data[,c(11:12)]
@@ -156,8 +158,12 @@ server <- function(input, output, session, ...) {
     units <- "&units=metric"
     url_comp <-paste0(url3,lat,lon,appID,units)
     weather_data <- fromJSON(url_comp)
-    weather_table <- data.frame('Weather' = weather_data$weather$main, 'Temperature' = paste(weather_data$main$temp, '\u00B0C'), 'Directions' = "Click Me for Directions!")
+    weather_table <- data.frame('Weather' = weather_data$weather$main, 'Temperature' = paste(weather_data$main$temp, '\u00B0C'))
     icon_table <- gather(weather_table,'','')
+    names(icon_table) <- c("Weather"," ")
+    link <- as.character(tags$a(tags$img(src="https://image.flaticon.com/icons/svg/355/355980.svg",height=50,width=50),href=gmaps_link))
+    icon_table2 <- data.frame("Directions" = link)
+    
     
     ##Respective Weather images as icons for weather description. 
     images<- if (weather_data$weather$id == 800) { # Clear Sky
@@ -176,9 +182,9 @@ server <- function(input, output, session, ...) {
       tags$img(height=30,width=30, src = "https://image.flaticon.com/icons/svg/1163/1163726.svg")
     }
   
-    icon_table[,1] <- c((as.character(images)),as.character(icon('thermometer-2')),
-                        as.character(tags$a(tags$img(src="https://image.flaticon.com/icons/svg/355/355980.svg",height=30,width=30),href=gmaps_link)))
+    icon_table[,1] <- c((as.character(images)),as.character(tags$img(src="https://image.flaticon.com/icons/svg/1164/1164915.svg",height=30,width=30)))
     output$weather <- renderTable(icon_table, sanitize.text.function = function(x) x)
+    output$Directions <- renderTable(icon_table2,align = "r",sanitize.text.function = function(x) x)
     
 
     
