@@ -1,4 +1,3 @@
-source("global.R", local=TRUE)
 server <- function(input, output, session, ...) {
   
   ###### START SETUP OF SESSION VARIABLES ########
@@ -7,25 +6,54 @@ server <- function(input, output, session, ...) {
   # Load dataset which is run ech time user visits, so that it will be refreshed
   ### load carpark available dataset from mongo only when initialized
   # carparkAvail<-getAllCarparks(limit=288, fake=fake)
-  ### load latest time from mongo and set it for all sessions
-  latestTime<<-getAllCarparks(limit=1, fake=fake)$time[[1]]
-  
-  ### get predicted carpark info
-  if (fake){
-    prediction<-get_prediction_historical(latestTime=latestTime, carparkAvail=getAllCarparks(limit=288, fake=fake),
-                                            historical_data=readRDS("./data/backup"))
-  }
-  else {
-    prediction<-get_prediction_historical_3(latestTime=latestTime, carparkAvail=getAllCarparks(limit=288, fake=fake),
-                                            historical_data=readRDS("./data/backup"))
+  ### load latest time from mongo
+  mongo_time<-getAllCarparks(limit=1, fake=fake)$time[[1]]
+  cat(paste(mongo_time, "is the latest mongo time\n"))
+
+  #if latest time from mongo is not the latest time on the server, we need to query mongo and update the dataset
+  # latestTime <- mongo_time - as.difftime(0.5, unit="days")
+  num_update<-(difftime(mongo_time, latestTime, units='min') / TIME_INTERVAL)%>%as.numeric
+  update_current_prediction<-function(num_update = num_update){
+    current_lots<-getAllCarparks(limit=num_update, fake=fake)
+    current_lots$is_pred<-FALSE
+    prediction_lots<-get_6_days_ago(limit=num_update)
+    prediction_lots$is_pred<-TRUE
+    return(rbind(current_lots,prediction_lots))
   }
 
+  if (num_update > 0) {
+    cat("Trying to update availability...")
     
+    #update prediction and take out the old predictions
+    prediction<<-prediction  %>%
+      filter( ((time>mongo_time) & (is_pred==TRUE)) | is_pred == FALSE ) %>%
+      rbind (update_current_prediction(num_update = num_update))
+    latestTime<<-mongo_time
+    cat("succesfully updated predictions and current available")
+  } else{
+    cat(paste(mongo_time, "is the same as the server latest dataframe no need to update dataframe\n"))
+  }
+
+  
+  #set up chosen time dynamic ui
+  output$time_control<- renderUI({
+    sliderInput(inputId = 'chosen_time',
+              label = 'time to predict',
+              value = as.POSIXct(latestTime),
+              min = as.POSIXct(latestTime),
+              max = as.POSIXct(latestTime) + 24*60*60,
+              step = 30*60,
+              ticks = FALSE,
+              timeFormat = "%m/%d/%Y %I:%M %p")})
   
   
   #reactive time chosen based on sidebar for predictions
   chosen_time <- reactive({
-    input$chosen_time
+    cat("Debug: The chosen time was requested\n")
+    if (is.null(input$chosen_time)) { 
+      return(latestTime)#prevent crash as ui for choosing time is only updated later on
+    }
+    return(input$chosen_time)
   })
   
 
@@ -38,6 +66,7 @@ server <- function(input, output, session, ...) {
     hdb_geo_info <- hdb_geo_info %>% filter(!is.na(avail_lots))
     #add info of whether carpark should be green, orange, red for use in sidebar filter
     hdb_geo_info$lot_avail_colour <- hdb_geo_info$avail_lots %>% sapply(get_colour)
+    cat("Debug: Successfully updated carpark availability based on chosen time\n")
     return(hdb_geo_info)
   })
 
@@ -110,7 +139,10 @@ server <- function(input, output, session, ...) {
                           icon=icons_reactive(),
                           layerId =~car_park_no,label = ~htmlEscape(paste(avail_lots)),
                           labelOptions = labelOptions(noHide = T, direction = "bottom", 
-                                                      className = "leaflet-label"))
+                                                      className = "leaflet-label"),
+                          popup = paste0("<a class = 'gmaps-icon' href = https://www.google.com/maps?daddr=", data$lat,",", data$lon,"><img src='https://image.flaticon.com/icons/svg/355/355980.svg'>
+                                         </a>"), popupOptions = popupOptions(closeButton = FALSE)
+                          )
         else cat("nothing to display. This if else statement exists to prevent crash\n")}
   
   })
@@ -197,15 +229,18 @@ server <- function(input, output, session, ...) {
     #plot the graph
     output$plot <- renderPlotly({
       p <- ggplot(data = plot_data, aes(x = time, y = avail_lots, ymax = avail_lots, ymin=0, group = is_pred, text = paste0("Available Lots: ", avail_lots, "\nTime: ", time))) + 
-              geom_line(aes(linetype=is_pred, color=is_pred)) +
-              geom_ribbon(aes(fill=is_pred),alpha=0.5) + xlab("Time") +
-            ylab("Lots Available") + theme_stata() + scale_x_datetime(breaks = "4 hour",
-            labels = date_format("%l %p")) + 
-      theme(text = element_text(family= "Muli"), legend.position = "none", axis.text.x = element_text(angle=60), panel.background = element_blank())
+              geom_line(aes(color=is_pred)) +
+              geom_ribbon(aes(fill=is_pred),alpha=0.5) + 
+               xlab("Time") +
+            ylab("Lots Available") + theme_stata() + scale_x_datetime(breaks = "4 hour",labels = date_format("%l %p")) + 
+      theme(text = element_text(family= "Muli"), legend.position = "none", axis.text.x = element_text(angle=60), 
+            panel.background = element_blank(), panel.grid.major = element_blank())
       height <- session$clientData$output_p_height
       width <- session$clientData$output_p_width
       gg <- ggplotly(p, tooltip = "text", height = height, width = width)
-      gg %>% layout(xaxis=list(fixedrange=TRUE)) %>%  layout(yaxis=list(fixedrange=TRUE)) #fix the range of plotly
+      gg %>% layout(xaxis=list(fixedrange=TRUE)) %>%  
+            layout(yaxis=list(fixedrange=TRUE)) %>%#fix the range of plotly
+            layout(paper_bgcolor='transparent', plot_bgcolor='transparent') %>% config(displayModeBar = F)#transparent
       #controlling the style
       # gg <- style(gg, line= list(width = 1.5))
     })

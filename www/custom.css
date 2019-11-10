@@ -3,6 +3,30 @@
   padding-left: 0px;
 }
 
+.gmaps-icon{
+  background: transparent;
+}
+
+.leaflet-popup-content-wrapper {
+  background: transparent;
+    padding: 1px;
+    border-radius: 50px;
+    border-top-left-radius: 50px;
+    border-top-right-radius: 50px;
+    border-bottom-right-radius: 50px;
+    border-bottom-left-radius: 50px;
+
+}
+
+.leaflet-popup-tip {
+  background: black;
+  }
+
+.leaflet-popup-content {
+    margin: 0px !important;
+    line-height: 1.4 !important;
+}
+
 #map {
   height: 80vh !important;
 }
