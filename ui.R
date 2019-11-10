@@ -65,8 +65,9 @@ dashboardPage(
       tabItem(tabName='current', leafletOutput('map'), 
               fluidRow(
                 column(5, plotlyOutput(outputId = "plot")), 
-                column(5, tableOutput('table'), htmlOutput('link')),
-                column(2, tableOutput('weather'), textOutput("temp"))
+                column(4, tableOutput('table')),
+                column(2, tableOutput('weather'), br(),br(),
+                       tableOutput("Directions"))
               ))
     )
   )
