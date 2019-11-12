@@ -11,6 +11,7 @@ library(htmltools)
 library(ggthemes)
 library(scales)
 library(ggridges)
+library(timeDate)
 #for debug library(profvis)
 
 
@@ -24,7 +25,7 @@ source("modules/create_arima.R")
 ### Static variables ### Variables available to all sessions
 
 #James stuff
-fake<-FALSE #use fake=TRUE to avoid calling mongodb and use saved carpark data instead of realtime
+fake<-TRUE #use fake=TRUE to avoid calling mongodb and use saved carpark data instead of realtime
 Sys.setenv(TZ="Asia/Singapore") #to avoid mongo messing up the timezone
 TIME_INTERVAL<-5 #5 minutes, used for prediction intervals
 
@@ -37,7 +38,9 @@ if (fake){
 prediction<-get_prediction_historical(latestTime=latestTime, carparkAvail=getAllCarparks(limit=288, fake=fake),
                                         historical_data=readRDS("./data/backup"))
 }else {
-prediction<-get_prediction_historical_3(latestTime=latestTime, carparkAvail=getAllCarparks(limit=288, fake=fake),
+mongo_collection<-get_collection()
+prediction<-get_prediction_historical_3(latestTime=latestTime, carparkAvail=getAllCarparks(limit=288, 
+                                              fake=fake, mongo_collection=mongo_collection),
 historical_data=readRDS("./data/backup"))
 }
 

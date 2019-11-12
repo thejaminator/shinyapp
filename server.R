@@ -7,7 +7,7 @@ server <- function(input, output, session, ...) {
   ### load carpark available dataset from mongo only when initialized
   # carparkAvail<-getAllCarparks(limit=288, fake=fake)
   ### load latest time from mongo
-  mongo_time<-getAllCarparks(limit=1, fake=fake)$time[[1]]
+  mongo_time<-getAllCarparks(limit=1, fake=fake, mongo_collection=mongo_collection)$time[[1]]
   cat(paste(mongo_time, "is the latest mongo time\n"))
   cat(paste(latestTime, "is the latest dataframe time\n"))
   
@@ -16,9 +16,9 @@ server <- function(input, output, session, ...) {
   num_update<-(difftime(mongo_time, latestTime, units='min') / TIME_INTERVAL)%>%as.numeric
   
   update_current_prediction<-function(num_update = num_update){
-    current_lots<-getAllCarparks(limit=num_update, fake=fake)
+    current_lots<-getAllCarparks(limit=num_update, fake=fake, mongo_collection=mongo_collection)
     current_lots$is_pred<-FALSE
-    prediction_lots<-get_6_days_ago(limit=num_update)
+    prediction_lots<-get_6_days_ago(limit=num_update, mongo_collection=mongo_collection)
     prediction_lots$is_pred<-TRUE
     return(rbind(current_lots,prediction_lots))
   }
@@ -34,7 +34,7 @@ server <- function(input, output, session, ...) {
     latestTime<<-prediction%>% filter(is_pred==FALSE) %>% .$time %>% .[1]
 
     cat("succesfully updated predictions and current available")
-    cat(paste(latestTime, "updated to the latest dataframe time\n"))
+    cat(paste(latestTime, "updated the latest dataframe time\n"))
   } else{
     cat(paste(mongo_time, "is the same as the server latest dataframe no need to update dataframe\n"))
   }
@@ -43,13 +43,24 @@ server <- function(input, output, session, ...) {
   #set up chosen time dynamic ui
   output$time_control<- renderUI({
     sliderInput(inputId = 'chosen_time',
-              label = 'time to predict',
+              label = 'I will reach by',
               value = as.POSIXct(latestTime),
               min = as.POSIXct(latestTime),
               max = as.POSIXct(latestTime) + 24*60*60,
               step = 30*60,
               ticks = FALSE,
               timeFormat = "%m/%d/%Y %I:%M %p")})
+  
+  #set up the ui to get the carpark price to pay
+  output$carpark_duration_control<- renderUI({
+    sliderInput(inputId = 'chosen_carpark_time',
+                label = 'I will leave at',
+                value = as.POSIXct(latestTime),
+                min = as.POSIXct(latestTime) +1*60*60,
+                max = as.POSIXct(latestTime) + 24*60*60,
+                step = 30*60,
+                ticks = FALSE,
+                timeFormat = "%m/%d/%Y %I:%M %p")})
   
   
   #reactive time chosen based on sidebar for predictions
@@ -152,8 +163,10 @@ server <- function(input, output, session, ...) {
   
   })
   
-
   
+
+    
+    
   #Handles search input and zooms to coords
   observeEvent(input$button, {
     lat_lon <- get_zoom_level(input$address)
@@ -221,10 +234,18 @@ server <- function(input, output, session, ...) {
   
     icon_table[,1] <- c((as.character(images)),as.character(tags$img(src="https://image.flaticon.com/icons/svg/1164/1164915.svg",height=30,width=30)))
     output$weather <- renderTable(icon_table, sanitize.text.function = function(x) x)
-    output$Directions <- renderTable(icon_table2,align = "r",sanitize.text.function = function(x) x)
-    
+    # output$Directions <- renderTable(icon_table2,align = "r",sanitize.text.function = function(x) x)
 
-    
+    #calculate carpark price
+    output$carpark_price <-renderUI({
+      price<-get_carpark_price(input$chosen_time, input$chosen_carpark_time) %>% format
+      (nsmall = 2)
+      HTML(sprintf("<thead><tr><th>Price to Park</th><th>  </th></thead>
+           <tbody><tr><td><img class = 'dollar-sign' src='https://image.flaticon.com/icons/svg/211/211738.svg'>
+          </td><td> $%s </td></tr></tbody>
+          ", price))
+      
+    })    
     
     
     plot_data <- prediction %>% 
@@ -237,7 +258,8 @@ server <- function(input, output, session, ...) {
               geom_line(aes(color=is_pred)) +
               geom_ribbon(aes(fill=is_pred),alpha=0.5) + 
                xlab("Time") +
-            ylab("Lots Available") + theme_stata() + scale_x_datetime(breaks = "4 hour",labels = date_format("%l %p")) + 
+            ylab("Lots Available") + theme_stata() + scale_x_datetime(breaks = "4 hour",
+                                    labels = date_format("%l %p", tz = "Asia/Singapore")) + 
       theme(text = element_text(family= "Muli"), legend.position = "none", axis.text.x = element_text(angle=60), 
             panel.background = element_blank(), panel.grid.major = element_blank())
       height <- session$clientData$output_p_height
