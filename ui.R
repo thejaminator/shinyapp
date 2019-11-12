@@ -8,13 +8,17 @@ library(lubridate)
 library(plotly)
 library(shinyFeedback)
 
-## get latest time. Making it a function makes the ui check for latest time every time a page is requested
-get_latest_time <- function(){
-  latestTime
-}
 
 
-ui <- fluidPage(tags$head(
+ui <- fluidPage(
+  #allows search by enter button
+  tags$script(HTML(
+  '$(document).keyup(function(e) {
+      if (e.key == "Enter") {
+        $("#button").click();
+      }});'
+  )),
+  tags$head(
   #set up css
   tags$link(rel = "stylesheet", 
             type = "text/css", 
@@ -35,11 +39,11 @@ dashboardPage(
     sidebarMenu(
       menuItem("carpark lot availability", tabName = 'current' )
     ),
-    textInput(inputId = 'address',
+    tagAppendAttributes(textInput(inputId = 'address',
               label= "Postal Code/Address",
-              value = "-"
+              value = "bugis"),`data-proxy-click` = "button"
     ),
-
+    actionButton('button', 'Search carparks'),
     # sliderInput(inputId = 'chosen_time',
     #                              label = 'time to predict',
     #                              value = as.POSIXct(get_latest_time()),
@@ -55,8 +59,7 @@ dashboardPage(
                        selected = carpark_types),
     checkboxGroupInput(inputId = "chosen_avail",label="Carpark Availability",
                        choiceNames = c("Green > 50","Orange > 20","Red < 20"), choiceValues = c("green", "orange", "red"), 
-                       selected = c("green","orange","red")),
-    actionButton('button', 'Show carparks')
+                       selected = c("green","orange","red"))
   ),
   
   dashboardBody(
@@ -73,44 +76,3 @@ dashboardPage(
   )
 )
 )
-# 
-# 
-# 
-# ui <- dashboardPage(
-#   dashboardHeader(title = "Singapore Carpark Availability"),
-#   dashboardSidebar(
-#     sidebarMenu(
-#       menuItem("Current", tabName = 'current' ),
-#       menuItem("Predicted Availability", tabName = 'predict'),
-#       id = 'tabselected'
-#     ),
-#     textInput(inputId = 'address',
-#               label= "Postal Code/Address",
-#               value = "-"
-#     ),
-#     fluidRow(column(12, offset = 1,
-#                                      timeInput(inputId = 'chosen_time',"Time: ",value = Sys.time(), minute.steps = 30))
-#                      ),
-#     checkboxGroupInput(inputId = 'chosen_carparks', "Carpark Type:",carpark_types, selected = carpark_types),
-#     checkboxGroupInput(inputId = "chosen_avail",label="Carpark Availability",
-#                        choiceNames = c("Green > 50","Orange > 20","Red < 20"), choiceValues = c("green", "orange", "red"), 
-#                        selected = c("green","orange","red")),
-#     actionButton('button', 'Show carparks')
-#   ),
-#   
-#   dashboardBody(
-#     tags$head(tags$link(rel="stylesheet", type = "text/css", href = "custom.css")),
-#     
-#     useShinyFeedback(),
-#     tabItems(
-#       tabItem(tabName='current', leafletOutput('map'), 
-#               fluidRow(
-#                 column(5, plotlyOutput(outputId = "plot")), 
-#                 column (5, tableOutput('table'), htmlOutput('link')),
-#                 column(2, textOutput('weather'), textOutput('temp'))
-#               )
-#               ),
-#       tabItem(tabName='predict', h2('output another map'))
-#     )
-#   )
-# )

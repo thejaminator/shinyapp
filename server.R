@@ -9,10 +9,12 @@ server <- function(input, output, session, ...) {
   ### load latest time from mongo
   mongo_time<-getAllCarparks(limit=1, fake=fake)$time[[1]]
   cat(paste(mongo_time, "is the latest mongo time\n"))
-
+  cat(paste(latestTime, "is the latest dataframe time\n"))
+  
   #if latest time from mongo is not the latest time on the server, we need to query mongo and update the dataset
   # latestTime <- mongo_time - as.difftime(0.5, unit="days")
   num_update<-(difftime(mongo_time, latestTime, units='min') / TIME_INTERVAL)%>%as.numeric
+  
   update_current_prediction<-function(num_update = num_update){
     current_lots<-getAllCarparks(limit=num_update, fake=fake)
     current_lots$is_pred<-FALSE
@@ -27,9 +29,12 @@ server <- function(input, output, session, ...) {
     #update prediction and take out the old predictions
     prediction<<-prediction  %>%
       filter( ((time>mongo_time) & (is_pred==TRUE)) | is_pred == FALSE ) %>%
-      rbind (update_current_prediction(num_update = num_update))
-    latestTime<<-mongo_time
+      rbind (update_current_prediction(num_update = num_update),.)
+    
+    latestTime<<-prediction%>% filter(is_pred==FALSE) %>% .$time %>% .[1]
+
     cat("succesfully updated predictions and current available")
+    cat(paste(latestTime, "updated to the latest dataframe time\n"))
   } else{
     cat(paste(mongo_time, "is the same as the server latest dataframe no need to update dataframe\n"))
   }
@@ -140,7 +145,7 @@ server <- function(input, output, session, ...) {
                           layerId =~car_park_no,label = ~htmlEscape(paste(avail_lots)),
                           labelOptions = labelOptions(noHide = T, direction = "bottom", 
                                                       className = "leaflet-label"),
-                          popup = paste0("<a class = 'gmaps-icon' href = https://www.google.com/maps?daddr=", data$lat,",", data$lon,"><img src='https://image.flaticon.com/icons/svg/355/355980.svg'>
+                          popup = paste0("<a target='_blank' class = 'gmaps-icon' href = https://www.google.com/maps?daddr=", data$lat,",", data$lon,"><img src='https://image.flaticon.com/icons/svg/355/355980.svg'>
                                          </a>"), popupOptions = popupOptions(closeButton = FALSE)
                           )
         else cat("nothing to display. This if else statement exists to prevent crash\n")}

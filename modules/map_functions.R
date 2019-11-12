@@ -53,6 +53,7 @@ get_icons <- function(df){
 
 
 
+
 # 
 # leaflet(df.20) %>% addTiles() %>%
 #   addAwesomeMarkers(~long, ~lat, icon=icons, label=~as.character(mag))

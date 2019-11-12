@@ -11,7 +11,9 @@ library(mongolite)
 get_collection <- function(collection="carpark",db = "test_db"){
   source("modules/login.R", local= TRUE)
   mongo(collection=collection,db = db,
-        url=sprintf('mongodb+srv://%s:%s@james-cluster-bfs0h.gcp.mongodb.net',user,pass))
+        url=sprintf('mongodb://%s:%s@james-cluster-shard-00-00-bfs0h.gcp.mongodb.net:27017,james-cluster-shard-00-01-bfs0h.gcp.mongodb.net:27017,james-cluster-shard-00-02-bfs0h.gcp.mongodb.net:27017/test?ssl=true&replicaSet=james-cluster-shard-0&authSource=admin&retryWrites=true&w=majority',user,pass)
+  )
+        # url=sprintf('mongodb+srv://%s:%s@james-cluster-bfs0h.gcp.mongodb.net',user,pass))
 }
 
 
