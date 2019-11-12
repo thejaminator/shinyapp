@@ -1,12 +1,11 @@
 library(shiny)
+library(shinydashboardPlus)
+library(shinydashboard)
+library(shinyFeedback)
 library(ggplot2)
 library(plotly)
 library(leaflet)
-library(shinyFeedback)
 library(dplyr)
-library(data.table)
-library(shinydashboardPlus)
-library(shinydashboard)
 library(data.table)
 library(htmltools)
 library(ggthemes)
@@ -25,13 +24,13 @@ source("modules/create_arima.R")
 ### Static variables ### Variables available to all sessions
 
 #James stuff
-fake<-TRUE #use fake=TRUE to avoid calling mongodb and use saved carpark data instead of realtime
+fake<-FALSE #use fake=TRUE to avoid calling mongodb and use saved carpark data instead of realtime
 Sys.setenv(TZ="Asia/Singapore") #to avoid mongo messing up the timezone
 TIME_INTERVAL<-5 #5 minutes, used for prediction intervals
 
 #initially query carpark and store on server
 ### get predicted carpark info
-
+### run ONLY ONCE SO WE HAVE DEFAULT TIME VALUE
 latestTime<-getAllCarparks(limit=1, fake=fake)$time[[1]]
 
 if (fake){
@@ -47,8 +46,6 @@ historical_data=readRDS("./data/backup"))
 # Load dataset which is run ech time user visits, so that it will be refreshed
 
 
-### run ONLY ONCE SO WE HAVE DEFAULT TIME VALUE
-latestTime<-getAllCarparks(limit=1, fake=fake)$time[[1]]
 
 ### load latest time from mongo and set it for all sessions
 # uniqueCarparks <- unique(getAllCarparks(limit=1, fake=fake)$carpark_name)
