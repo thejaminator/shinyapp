@@ -43,7 +43,7 @@ server <- function(input, output, session, ...) {
   #set up chosen time dynamic ui
   output$time_control<- renderUI({
     sliderInput(inputId = 'chosen_time',
-              label = 'when are you parking?',
+              label = 'I will reach by',
               value = as.POSIXct(latestTime),
               min = as.POSIXct(latestTime),
               max = as.POSIXct(latestTime) + 24*60*60,
@@ -54,7 +54,7 @@ server <- function(input, output, session, ...) {
   #set up the ui to get the carpark price to pay
   output$carpark_duration_control<- renderUI({
     sliderInput(inputId = 'chosen_carpark_time',
-                label = 'when are you parking until?',
+                label = 'I will leave at',
                 value = as.POSIXct(latestTime),
                 min = as.POSIXct(latestTime) +1*60*60,
                 max = as.POSIXct(latestTime) + 24*60*60,
@@ -238,7 +238,8 @@ server <- function(input, output, session, ...) {
 
     #calculate carpark price
     output$carpark_price <-renderUI({
-      price<-get_carpark_price(input$chosen_time, input$chosen_carpark_time) %>% format(nsmall = 2)
+      price<-get_carpark_price(input$chosen_time, input$chosen_carpark_time) %>% format
+      (nsmall = 2)
       HTML(sprintf("<thead><tr><th>Price to Park</th><th>  </th></thead>
            <tbody><tr><td><img class = 'dollar-sign' src='https://image.flaticon.com/icons/svg/211/211738.svg'>
           </td><td> $%s </td></tr></tbody>

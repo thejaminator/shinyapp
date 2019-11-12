@@ -47,6 +47,7 @@ dashboardPage(
     uiOutput("time_control"),
     #time to park car
     uiOutput("carpark_duration_control"),
+    htmlOutput('carpark_price'),
     checkboxGroupInput(inputId = 'chosen_carparks', 
                        label = "Carpark Type:", 
                        choices = carpark_types, 
@@ -64,7 +65,7 @@ dashboardPage(
               fluidRow(
                 column(5, plotlyOutput(outputId = "plot")), 
                 column(4, tableOutput('table')),
-                column(2, tableOutput('weather'), htmlOutput('carpark_price'))
+                column(2, tableOutput('weather'))
               ))
     )
   )
