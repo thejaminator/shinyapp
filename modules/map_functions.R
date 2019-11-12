@@ -52,10 +52,39 @@ get_icons <- function(df){
 }
 
 
-
-
-# 
-# leaflet(df.20) %>% addTiles() %>%
-#   addAwesomeMarkers(~long, ~lat, icon=icons, label=~as.character(mag))
-# 
-
+get_carpark_price <- function(x,y){
+  T1 <- strftime(x, format="%H:%M:%S")
+  T2 <- strftime(y, format="%H:%M:%S")
+  A <- isWeekday(x, wday =1:6)
+  B <- isWeekday(y, wday =1:6)
+  if(T1 < "07:00:00" & A == 'FALSE'){A = "TRUE"} else if(T1 < "07:00:00" & A == "TRUE"){A = "TRUE"}
+  if(T2 < "07:00:00" & B == 'FALSE'){B = "TRUE"} else if(T2 < "07:00:00" & B == "TRUE"){B = "TRUE"}
+  G <- ifelse(T1 > "07:00:00" & T1 < "22:30:00", "Day", "Night") 
+  H <- ifelse(T2 > "07:00:00" & T2 < "22:30:00", "Day", "Night") 
+  if(A == 'TRUE' & B =='TRUE' & G =="Day" & H =="Day"){
+    abs(as.numeric(difftime(x,y,units="hours")))*1.2
+  } else if(A == 'TRUE' & B == 'TRUE' & G =="Day" & H =="Night"){
+    pmin(abs(as.numeric(difftime(x,y,units="hours")))*1.2,5)
+  } else if(A == 'TRUE' & B == 'TRUE' & G =="Night" & H =="Day"){
+    pmin(abs(as.numeric(difftime(x,y,units="hours")))*1.2,5)
+  } else if(A == 'TRUE' & B == 'TRUE' & G =="Night" & H =="Night"){
+    pmin(abs(as.numeric(difftime(x,y,units="hours")))*1.2,5)
+  } else if(A == 'TRUE' & B =='FALSE'){
+    P <- as.Date(y)
+    New <- lubridate::ymd_hm(paste(P, "6:30 AM"))
+    New <- as.POSIXct(as.numeric(New), origin=as.POSIXct("1970-01-01", tz="Asia/Singapore"), tz="Asia/Singapore")
+    pmin(abs(as.numeric(difftime(x,New,units="hours")))*1.2,5)
+  } else if(A == 'FALSE' & B == 'TRUE' & H == "Day"){
+    P <- as.Date(y)
+    New <- lubridate::ymd_hm(paste(P, "6:30 AM"))
+    New <- as.POSIXct(as.numeric(New), origin=as.POSIXct("1970-01-01", tz="Asia/Singapore"), tz="Asia/Singapore")
+    abs(as.numeric(difftime(y,New,units="hours")))*1.2
+  } else if(A == 'FALSE' & B == 'TRUE' & T2 < "07:00:00"){
+    "0"
+  } else if(A == 'FALSE' & B == 'TRUE' & T2 > "22:30:00"){
+    P <- as.Date(y)
+    New <- lubridate::ymd_hm(paste(P, "6:30 AM"))
+    New <- as.POSIXct(as.numeric(New), origin=as.POSIXct("1970-01-01", tz="Asia/Singapore"), tz="Asia/Singapore")
+    pmin(abs(as.numeric(difftime(New,y,units="hours")))*1.2,5)
+  }else{"0"}
+}

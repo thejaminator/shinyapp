@@ -44,15 +44,9 @@ dashboardPage(
               value = "bugis"),`data-proxy-click` = "button"
     ),
     actionButton('button', 'Search carparks'),
-    # sliderInput(inputId = 'chosen_time',
-    #                              label = 'time to predict',
-    #                              value = as.POSIXct(get_latest_time()),
-    #                              min = as.POSIXct(get_latest_time()),
-    #                              max = as.POSIXct(get_latest_time()) + 24*60*60,
-    #                              step = 30*60,
-    #                              ticks = FALSE,
-    #                              timeFormat = "%m/%d/%Y %I:%M %p"),
     uiOutput("time_control"),
+    #time to park car
+    uiOutput("carpark_duration_control"),
     checkboxGroupInput(inputId = 'chosen_carparks', 
                        label = "Carpark Type:", 
                        choices = carpark_types, 
@@ -60,6 +54,7 @@ dashboardPage(
     checkboxGroupInput(inputId = "chosen_avail",label="Carpark Availability",
                        choiceNames = c("Green > 50","Orange > 20","Red < 20"), choiceValues = c("green", "orange", "red"), 
                        selected = c("green","orange","red"))
+
   ),
   
   dashboardBody(
@@ -69,8 +64,7 @@ dashboardPage(
               fluidRow(
                 column(5, plotlyOutput(outputId = "plot")), 
                 column(4, tableOutput('table')),
-                column(2, tableOutput('weather'), br(),br(),
-                       tableOutput("Directions"))
+                column(2, tableOutput('weather'), htmlOutput('carpark_price'))
               ))
     )
   )
