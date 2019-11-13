@@ -92,11 +92,42 @@ get_prediction_historical_3<-function(latestTime, carparkAvail, historical_data)
   rbind(carparkAvail,historical_data)
 }
 ## Use this to update historical_data
-# historical_data<-getAllCarparks(limit=2016)
+# historical_data<-getAllCarparks(limit=4032)
 # historical_data %>% saveRDS("./data/backup")
 
+### to plot graph for report
 
-#make predictions and historical data into prediction dataframe
+#get 2 weeks data
+carpark_data<-readRDS("./data/backup")
+
+rsquared <- function (x, y) cor(x, y) ^ 2
+
+plot_prediction <- function(carpark_data, carpark_choice){
+  carpark_data <- carpark_data %>% filter(carpark_name == carpark_choice)
+  #split data into first and second week
+  first_week<-carpark_data[1:(nrow(carpark_data)/2),]
+  second_week<-carpark_data[(nrow(carpark_data)/2+1):nrow(carpark_data),]#
+  #use the second_week as prediction
+  second_week$time <- second_week$time + as.difftime(7, unit="days")
+  #add columns to identify for plotting
+  first_week$label <- "Actual"
+  second_week$label <- "Predicted using t minus 1 week"
+  
+  rsq<-sprintf("Rsquared for %s: %f", carpark_choice,rsquared(first_week$avail_lots,second_week$avail_lots))
+  
+  rbind(first_week,second_week) %>% 
+    ggplot(data = ., aes(x=time, y=avail_lots)) + 
+    geom_line(aes(color = label)) + ggtitle(rsq)
+}
+
+carpark_data %>% plot_prediction(carpark_choice="GM5_C")
+carpark_data %>% plot_prediction("U26_C")
+
+
+
+
+
+|#make predictions and historical data into prediction dataframe
 #
 
 
@@ -106,11 +137,10 @@ get_prediction_historical_3<-function(latestTime, carparkAvail, historical_data)
 #daily = 288 periods, weekly = 2016install.packages("readxl")
 
 
-
-
-# 
-# #hourly is 24
-# test<-hourly$BM29_C %>% msts(seasonal.periods=c(24,168))
+#hourly is 24
+# library(dplyr)
+# library(forecast)
+# test<-historical_data %>% filter(carpark_name == "HE12_C") %>% select(avail_lots) %>% ts(deltat=1/288)
 # # ggplot(data= test, aes(x=time, y=BM29_C)) + geom_line()
 # 
 # # transform to bounds
