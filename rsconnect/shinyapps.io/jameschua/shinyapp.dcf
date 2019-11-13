@@ -5,9 +5,9 @@ account: jameschua
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 1424333
-bundleId: 2582789
+bundleId: 2583767
 url: https://jameschua.shinyapps.io/shinyapp/
-when: 1573557852.16392
+when: 1573579976.80503
 asMultiple: FALSE
 asStatic: FALSE
 ignoredFiles: python

@@ -55,9 +55,9 @@ server <- function(input, output, session, ...) {
   output$carpark_duration_control<- renderUI({
     sliderInput(inputId = 'chosen_carpark_time',
                 label = 'I will leave at',
-                value = as.POSIXct(latestTime),
-                min = as.POSIXct(latestTime) +1*60*60,
-                max = as.POSIXct(latestTime) + 24*60*60,
+                value = input$chosen_time,
+                min = input$chosen_time +1*60*60,
+                max = input$chosen_time + 24*60*60,
                 step = 30*60,
                 ticks = FALSE,
                 timeFormat = "%m/%d/%Y %I:%M %p")})

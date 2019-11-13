@@ -69,6 +69,7 @@ get_6_days_ago<-function(mongo_collection=get_collection(), limit=288, fake = FA
     df %>% gather(key=carpark_name,value = avail_lots, -time)
   }
 }
-# in case mongo does not work
+# # in case mongo does not work
 # carparkAvail<-getAllCarparks(limit=2016)
+# write.csv(carparkAvail,file="2weeks_carpark.csv")
 # carparkAvail %>% saveRDS("./data/backup")
